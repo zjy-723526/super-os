@@ -24,6 +24,7 @@ fastfetch
 # ─── Boot ───
 efibootmgr
 grub
+syslinux
 
 # ─── Network ───
 networkmanager

@@ -13,7 +13,7 @@ iso_application="Super-OS Live/Installation Media"
 iso_version="$(date +%Y.%m.%d)"
 
 # Boot modes
-bootmodes=("bios.syslinux.mbr" "bios.syslinux.eltorito" "uefi-x64.systemd-boot.esp" "uefi-x64.systemd-boot.eltorito")
+bootmodes=("bios.syslinux" "uefi.systemd-boot")
 
 # Build mode
 buildmode="iso"
