@@ -40,15 +40,17 @@ jobs:
               sudo -u builder makepkg -s --noconfirm --needed --nocheck
 
               # Create local pacman repo
-              mkdir -p /tmp/local-repo
-              cp *.pkg.tar.zst /tmp/local-repo/
-              cd /tmp/local-repo
-              repo-add local-repo.db.tar.gz *.pkg.tar.zst
+              mkdir -p /tmp/superos-repo
+              cp *.pkg.tar.zst /tmp/superos-repo/
+              cd /tmp/superos-repo
+              repo-add superos-repo.db.tar.gz *.pkg.tar.zst
 
-              # Add local repo to profile pacman.conf
+              # Add local repo to profile pacman.conf (use unique name)
+              # Remove any previously added superos-repo section
+              sed -i "/^\[superos-repo\]/,/^$/d" /super-os/iso/profile/pacman.conf 2>/dev/null || true
               echo "" >> /super-os/iso/profile/pacman.conf
-              echo "[local]" >> /super-os/iso/profile/pacman.conf
-              echo "Server = file:///tmp/local-repo" >> /super-os/iso/profile/pacman.conf
+              echo "[superos-repo]" >> /super-os/iso/profile/pacman.conf
+              echo "Server = file:///tmp/superos-repo" >> /super-os/iso/profile/pacman.conf
               echo "SigLevel = Never" >> /super-os/iso/profile/pacman.conf
 
               # ─── Build ISO ───
