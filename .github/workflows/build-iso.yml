@@ -21,9 +21,37 @@ jobs:
             archlinux:latest \
             bash -c '
               set -e
+
               echo "[+] Configuring mirrors..."
               echo "Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
-              pacman -Sy --noconfirm archiso git base-devel
+              pacman -Sy --noconfirm --needed archiso git base-devel sudo
+
+              # ─── Build calamares from AUR ───
+              echo "[+] Building calamares from AUR (this takes ~10-15 min)..."
+              useradd -m builder
+              echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+              cd /tmp
+              sudo -u builder git clone https://aur.archlinux.org/calamares.git
+              cd calamares
+              chown -R builder:builder .
+
+              # Install build deps and build
+              sudo -u builder makepkg -s --noconfirm --needed --nocheck
+
+              # Create local pacman repo
+              mkdir -p /tmp/local-repo
+              cp *.pkg.tar.zst /tmp/local-repo/
+              cd /tmp/local-repo
+              repo-add local-repo.db.tar.gz *.pkg.tar.zst
+
+              # Add local repo to profile pacman.conf
+              echo "" >> /super-os/iso/profile/pacman.conf
+              echo "[local]" >> /super-os/iso/profile/pacman.conf
+              echo "Server = file:///tmp/local-repo" >> /super-os/iso/profile/pacman.conf
+              echo "SigLevel = Never" >> /super-os/iso/profile/pacman.conf
+
+              # ─── Build ISO ───
               echo "[+] Building ISO..."
               cd /super-os/iso
               bash build-iso.sh /output
