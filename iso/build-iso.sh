@@ -20,7 +20,7 @@ pacman -Sy --noconfirm --needed archiso git base-devel
 if ! command -v mkarchiso &>/dev/null; then
     err "mkarchiso 未找到, 安装 archiso 失败"
 fi
-log "archiso $(mkarchiso --version 2>/dev/null || echo 'OK')"
+log "archiso OK (mkarchiso found)"
 
 # ─── 目录设置 ───
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -33,7 +33,9 @@ log "输出:    $OUTPUT_DIR"
 
 # ─── 清理旧构建 ───
 log "清理旧构建..."
-rm -rf "$WORK_DIR" "$OUTPUT_DIR"
+rm -rf "$WORK_DIR"
+# 只清内容不删目录本身 (Docker 挂载卷无法删除挂载点)
+rm -rf "${OUTPUT_DIR:?}"/*
 mkdir -p "$OUTPUT_DIR"
 
 # ─── 同步脚本和配置到 airootfs ───
