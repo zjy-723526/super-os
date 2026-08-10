@@ -1,0 +1,38 @@
+name: Build Super-OS ISO
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ISO in Arch Docker
+        run: |
+          mkdir -p iso/output
+          docker run --rm --privileged \
+            -v "$(pwd):/super-os" \
+            -v "$(pwd)/iso/output:/output" \
+            archlinux:latest \
+            bash -c '
+              set -e
+              echo "[+] Configuring mirrors..."
+              echo "Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
+              pacman -Sy --noconfirm archiso git base-devel
+              echo "[+] Building ISO..."
+              cd /super-os/iso
+              bash build-iso.sh /output
+            '
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: Super-OS-ISO
+          path: iso/output/*.iso
+          retention-days: 7
+          compression-level: 0

@@ -1,0 +1,12 @@
+[Unit]
+Description=Super-OS Live Environment Setup
+After=NetworkManager.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/root/.automated_script.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

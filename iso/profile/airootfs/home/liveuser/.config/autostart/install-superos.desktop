@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Super-OS Installer
+Exec=calamares -d
+Icon=system-software-install
+Terminal=false
+Type=Application
+NoDisplay=true

@@ -1,0 +1,12 @@
+# Build output
+iso/output/
+*.iso
+
+# Temp
+*.tmp
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

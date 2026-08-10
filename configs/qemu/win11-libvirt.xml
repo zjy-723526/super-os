@@ -1,0 +1,141 @@
+<!--
+  Super-OS Windows 11 libvirt XML 模板
+  用于 virt-manager 导入
+  使用前请修改:
+    - GPU PCI 地址
+    - 内存/CPU 分配
+    - 磁盘路径
+    - OVMF 路径
+-->
+<domain type="kvm" xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0">
+  <name>win11</name>
+  <title>Windows 11 - GPU Passthrough</title>
+  <description>Super-OS Windows 11 VM with VFIO GPU Passthrough</description>
+
+  <memory unit="GiB">32</memory>
+  <currentMemory unit="GiB">32</currentMemory>
+  <memoryBacking>
+    <hugepages/>
+    <locked/>
+  </memoryBacking>
+
+  <vcpu placement="static">16</vcpu>
+  <cputune>
+    <vcpupin vcpu="0" cpuset="8"/>
+    <vcpupin vcpu="1" cpuset="9"/>
+    <vcpupin vcpu="2" cpuset="10"/>
+    <vcpupin vcpu="3" cpuset="11"/>
+    <vcpupin vcpu="4" cpuset="12"/>
+    <vcpupin vcpu="5" cpuset="13"/>
+    <vcpupin vcpu="6" cpuset="14"/>
+    <vcpupin vcpu="7" cpuset="15"/>
+    <vcpupin vcpu="8" cpuset="16"/>
+    <vcpupin vcpu="9" cpuset="17"/>
+    <vcpupin vcpu="10" cpuset="18"/>
+    <vcpupin vcpu="11" cpuset="19"/>
+    <vcpupin vcpu="12" cpuset="20"/>
+    <vcpupin vcpu="13" cpuset="21"/>
+    <vcpupin vcpu="14" cpuset="22"/>
+    <vcpupin vcpu="15" cpuset="23"/>
+  </cputune>
+
+  <os>
+    <type arch="x86_64" machine="q35">hvm</type>
+    <loader readonly="yes" type="pflash">/usr/share/edk2-ovmf/x64/OVMF_CODE.fd</loader>
+    <nvram>/var/lib/libvirt/qemu/nvram/win11_VARS.fd</nvram>
+    <boot dev="hd"/>
+  </os>
+
+  <features>
+    <acpi/>
+    <apic/>
+    <hyperv>
+      <relaxed state="on"/>
+      <vapic state="on"/>
+      <spinlocks state="on" retries="8191"/>
+      <vpindex state="on"/>
+      <synic state="on"/>
+      <stimer state="on"/>
+      <vendor_id state="on" value="chimera"/>
+    </hyperv>
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
+    <vmport state="off"/>
+    <ioapic driver="kvm"/>
+  </features>
+
+  <cpu mode="host-passthrough" check="none">
+    <topology sockets="1" dies="1" cores="8" threads="2"/>
+    <cache mode="passthrough"/>
+    <feature policy="disable" name="hypervisor"/>
+  </cpu>
+
+  <clock offset="localtime">
+    <timer name="hpet" present="no"/>
+    <timer name="hypervclock" present="yes"/>
+  </clock>
+
+  <devices>
+    <!-- GPU 直通 -->
+    <hostdev mode="subsystem" type="pci" managed="yes">
+      <source>
+        <address domain="0x0000" bus="0x01" slot="0x00" function="0x0"/>
+      </source>
+    </hostdev>
+    <hostdev mode="subsystem" type="pci" managed="yes">
+      <source>
+        <address domain="0x0000" bus="0x01" slot="0x00" function="0x1"/>
+      </source>
+    </hostdev>
+
+    <!-- 系统盘 -->
+    <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2" cache="none" io="native" discard="unmap"/>
+      <source file="/var/lib/libvirt/images/win11.qcow2"/>
+      <target dev="vda" bus="virtio"/>
+    </disk>
+
+    <!-- 网络 -->
+    <interface type="user">
+      <model type="virtio"/>
+      <mac address="52:54:00:12:34:56"/>
+    </interface>
+
+    <!-- 音频 -->
+    <sound model="ich9">
+      <codec type="micro"/>
+      <audio id="audio1"/>
+    </sound>
+    <audio id="audio1" type="pulseaudio" serverName="/run/user/1000/pulse/native"/>
+
+    <!-- SPICE 输入 + 剪贴板 -->
+    <graphics type="spice" autoport="yes">
+      <listen type="none"/>
+      <image compression="off"/>
+      <jpeg compression="never"/>
+      <zlib compression="never"/>
+      <playback compression="off"/>
+      <streaming mode="off"/>
+    </graphics>
+    <video>
+      <model type="none"/>
+    </video>
+    <channel type="spicevmc">
+      <target type="virtio" name="com.redhat.spice.0"/>
+    </channel>
+
+    <!-- TPM 2.0 -->
+    <tpm model="tpm-tis">
+      <backend type="emulator" version="2.0"/>
+    </tpm>
+  </devices>
+
+  <!-- Looking Glass IVSHMEM -->
+  <qemu:commandline>
+    <qemu:arg value="-device"/>
+    <qemu:arg value="ivshmem-plain,memdev=ivshmem"/>
+    <qemu:arg value="-object"/>
+    <qemu:arg value="memory-backend-file,id=ivshmem,share=on,mem-path=/dev/shm/looking-glass,size=64M"/>
+  </qemu:commandline>
+</domain>

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Super-OS Installer
+Exec=calamares -d
+Icon=system-software-install
+Terminal=false
+Type=Application
+Categories=System;
+X-KDE-autostart-phase=1
+X-KDE-StartupNotify=true
+NoDisplay=true

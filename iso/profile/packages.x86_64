@@ -1,0 +1,153 @@
+# ==============================================
+# Super-OS Package List
+# KDE Plasma + KVM/QEMU + Waydroid + Gaming
+# ==============================================
+
+# ─── Base System ───
+base
+base-devel
+linux-zen
+linux-zen-headers
+linux-firmware
+intel-ucode
+btrfs-progs
+sudo
+vim
+git
+curl
+wget
+zsh
+htop
+btop
+fastfetch
+
+# ─── Boot ───
+efibootmgr
+grub
+
+# ─── Network ───
+networkmanager
+iwd
+openssh
+
+# ─── GPU Drivers (全品牌) ───
+# Intel
+mesa
+vulkan-intel
+intel-media-driver
+libva-utils
+# AMD
+vulkan-radeon
+libva-mesa-driver
+# NVIDIA (闭源驱动, 安装后需在目标机器上激活)
+nvidia-dkms
+nvidia-utils
+nvidia-settings
+# 通用
+vulkan-icd-loader
+vulkan-tools
+lib32-vulkan-icd-loader
+
+# ─── KDE Plasma 6 (Wayland) ───
+plasma-meta
+plasma-wayland-session
+kde-applications-meta
+sddm
+sddm-kcm
+konsole
+dolphin
+kate
+gwenview
+okular
+spectacle
+ark
+
+# ─── Audio ───
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+wireplumber
+pavucontrol-qt
+
+# ─── Virtualization ───
+qemu-full
+libvirt
+virt-manager
+edk2-ovmf
+virglrenderer
+swtpm
+virt-viewer
+spice
+spice-vdagent
+
+# ─── Looking Glass Dependencies ───
+cmake
+gcc
+make
+pkg-config
+wayland
+wayland-protocols
+libx11
+libxss
+libxrandr
+libxfixes
+glew
+glfw-x11
+freetype2
+fontconfig
+spice-protocol
+sdl2
+libsamplerate
+
+# ─── Waydroid Dependencies ───
+python
+python-pip
+lxc
+dnsmasq
+
+# ─── Games & Wine ───
+wine
+wine-mono
+wine-gecko
+dxvk
+vkd3d
+lutris
+gamemode
+mangohud
+gamescope
+steam
+
+# ─── Fonts & I18n ───
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+ttf-dejavu
+ttf-liberation
+adobe-source-han-sans-cn-fonts
+adobe-source-han-serif-cn-fonts
+wqy-microhei
+wqy-zenhei
+
+# ─── Chinese Input Method ───
+fcitx5
+fcitx5-chinese-addons
+fcitx5-configtool
+fcitx5-gtk
+fcitx5-qt
+fcitx5-material-color
+libime
+fcitx5-pinyin-zhwiki
+
+# ─── Utilities ───
+firefox
+file-roller
+gparted
+partitionmanager
+calamares
+arch-install-scripts
+reflector
+pacman-contrib
+usbutils
+pciutils
+lsb-release

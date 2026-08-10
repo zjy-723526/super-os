@@ -1,0 +1,32 @@
+[Looking Glass - Windows 11]
+Description=Windows 11 VM window rules
+wmclass=looking-glass-client
+wmclassmatch=1
+
+# 窗口类型
+types=1       # Normal window
+noborder=true  # 去掉标题栏
+nobordermatch=2
+
+# 位置和大小
+display=0
+maximizehoriz=true
+maximizehorizrule=2
+maximizevert=true
+maximizevertrule=2
+
+# 虚拟桌面固定
+desktop=2      # 固定到虚拟桌面 2
+desktoprule=2
+
+# 焦点策略
+focus=2        # Focus stealing prevention low
+focusrule=2
+
+# 活动
+skipswitcher=false
+skiptaskbar=false
+
+# 全屏
+fullscreen=true
+fullscreenrule=2
