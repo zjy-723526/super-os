@@ -23,31 +23,6 @@ jobs:
               echo "==> Configuring mirrors..."
               echo "Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
               pacman -Sy --noconfirm --needed archiso
-
-              echo "==> Adding EndeavourOS repo (has prebuilt calamares)..."
-              # Find calamares package on EndeavourOS mirror
-              ENDEAVOUR_MIRROR="https://mirror.alpix.eu/endeavouros/repo/endeavouros/x86_64"
-              CALA_PKG=\$(curl -sL "\$ENDEAVOUR_MIRROR/" 2>/dev/null | grep -oP "calamares-[0-9].*?pkg\.tar\.zst" | head -1 || true)
-
-              if [ -n "\$CALA_PKG" ]; then
-                echo "  Found: \$CALA_PKG"
-                mkdir -p /tmp/calamares-repo
-                curl -sL -o "/tmp/calamares-repo/\$CALA_PKG" "\$ENDEAVOUR_MIRROR/\$CALA_PKG"
-                cd /tmp/calamares-repo
-                repo-add calamares.db.tar.gz *.pkg.tar.zst
-
-                sed -i "/^\[calamares\]/,/^$/d" /super-os/iso/profile/pacman.conf 2>/dev/null || true
-                echo "" >> /super-os/iso/profile/pacman.conf
-                echo "[calamares]" >> /super-os/iso/profile/pacman.conf
-                echo "Server = file:///tmp/calamares-repo" >> /super-os/iso/profile/pacman.conf
-                echo "SigLevel = Never" >> /super-os/iso/profile/pacman.conf
-
-                grep -q "^calamares$" /super-os/iso/profile/packages.x86_64 || \
-                  sed -i "/^arch-install-scripts\$/i calamares" /super-os/iso/profile/packages.x86_64
-              else
-                echo "  WARNING: calamares not found on EndeavourOS mirror, skipping"
-              fi
-
               echo "==> Building ISO..."
               cd /super-os/iso
               bash build-iso.sh /output
