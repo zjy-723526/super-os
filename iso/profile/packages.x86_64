@@ -39,7 +39,6 @@ intel-media-driver
 libva-utils
 # AMD
 vulkan-radeon
-libva-mesa-driver
 # NVIDIA (闭源驱动, 安装后需在目标机器上激活)
 nvidia-dkms
 nvidia-utils
@@ -143,7 +142,6 @@ firefox
 file-roller
 gparted
 partitionmanager
-calamares
 arch-install-scripts
 reflector
 pacman-contrib
