@@ -23,6 +23,24 @@ jobs:
               echo "==> Configuring mirrors..."
               echo "Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
               pacman -Sy --noconfirm --needed archiso
+
+              echo "==> Downloading prebuilt calamares..."
+              mkdir -p /tmp/calamares-repo
+              cd /tmp/calamares-repo
+              curl -L -o calamares-core.pkg.tar.zst \
+                "https://github.com/RebornOS-Team/calamares-core/releases/download/v3.3.8_002/calamares-core-3.3.8_002-1-x86_64.pkg.tar.zst"
+              repo-add calamares.db.tar.gz *.pkg.tar.zst
+
+              echo "==> Adding calamares to repo config..."
+              sed -i "/^\[calamares\]/,/^$/d" /super-os/iso/profile/pacman.conf 2>/dev/null || true
+              echo "" >> /super-os/iso/profile/pacman.conf
+              echo "[calamares]" >> /super-os/iso/profile/pacman.conf
+              echo "Server = file:///tmp/calamares-repo" >> /super-os/iso/profile/pacman.conf
+              echo "SigLevel = Never" >> /super-os/iso/profile/pacman.conf
+
+              grep -q "^calamares$" /super-os/iso/profile/packages.x86_64 || \
+                sed -i "/^arch-install-scripts$/i calamares" /super-os/iso/profile/packages.x86_64
+
               echo "==> Building ISO..."
               cd /super-os/iso
               bash build-iso.sh /output
