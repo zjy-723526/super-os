@@ -3,58 +3,70 @@ name: Build Super-OS ISO
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
   workflow_dispatch:
 
 jobs:
-  build:
+  # ─── Build Docker image with calamares pre-compiled ───
+  docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Build ISO in Arch Docker
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push build image
+        uses: docker/build-push-action@v6
+        with:
+          context: iso
+          file: iso/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/super-os-builder:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── Build ISO using pre-built image ───
+  iso:
+    needs: docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build ISO
         run: |
           mkdir -p iso/output
           docker run --rm --privileged \
             -v "$(pwd):/super-os" \
             -v "$(pwd)/iso/output:/output" \
-            archlinux:latest \
+            ghcr.io/${{ github.repository_owner }}/super-os-builder:latest \
             bash -c '
               set -e
-
-              echo "[+] Configuring mirrors..."
-              echo "Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
-              pacman -Sy --noconfirm --needed archiso git base-devel sudo
-
-              # ─── Build calamares from AUR ───
-              echo "[+] Building calamares from AUR (this takes ~10-15 min)..."
-              useradd -m builder
-              echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-              cd /tmp
-              sudo -u builder git clone https://aur.archlinux.org/calamares.git
-              cd calamares
-              chown -R builder:builder .
-
-              # Install build deps and build
-              sudo -u builder makepkg -s --noconfirm --needed --nocheck
-
-              # Create local pacman repo
-              mkdir -p /tmp/superos-repo
-              cp *.pkg.tar.zst /tmp/superos-repo/
-              cd /tmp/superos-repo
-              repo-add superos-repo.db.tar.gz *.pkg.tar.zst
-
-              # Add local repo to profile pacman.conf (use unique name)
-              # Remove any previously added superos-repo section
-              sed -i "/^\[superos-repo\]/,/^$/d" /super-os/iso/profile/pacman.conf 2>/dev/null || true
+              # Add pre-built calamares repo
               echo "" >> /super-os/iso/profile/pacman.conf
               echo "[superos-repo]" >> /super-os/iso/profile/pacman.conf
               echo "Server = file:///tmp/superos-repo" >> /super-os/iso/profile/pacman.conf
               echo "SigLevel = Never" >> /super-os/iso/profile/pacman.conf
-
-              # ─── Build ISO ───
-              echo "[+] Building ISO..."
+              # Build ISO
               cd /super-os/iso
               bash build-iso.sh /output
             '
